@@ -1,6 +1,8 @@
 Rails.application.routes.draw do
-  namespace :entrance_manifests do
-    resources :entrance_manifests, only:[:index, :show, :create, :update, :destroy]
+  namespace :api do
+    namespace :v1 do
+      resources :entrance_manifests, only:[:index, :show, :create, :update, :destroy]
+    end
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

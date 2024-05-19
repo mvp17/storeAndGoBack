@@ -13,6 +13,10 @@ bundle install
 
 ## Start server
 bin/rails server
+rails server
+
+## DB migrations
+bin/rails db:migrate
 
 ## Cassandra DB
 cassandra -f
