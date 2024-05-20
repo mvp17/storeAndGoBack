@@ -1,37 +1,55 @@
 class Api::V1::EntranceManifestsController < ApplicationController
   # GET /api/v1/entranceManifests
   def index
-    render json: EntranceManifest.all
+    entrance_manifests = EntranceManifest.all
+    render json: entrance_manifests.map(&:as_json), status: :ok
   end
 
   # GET /api/v1/entranceManifests/:id
   def show
-    id = Cassandra::Uuid.new(params[:id])
-    record = YourModel.find(id)
-    if record
-      render json: record
+    entrance_manifest = EntranceManifest.find(params[:id])
+    if entrance_manifest
+      render json: entrance_manifest.as_json, status: :ok
     else
-      render json: { error: 'Record not found' }, status: :not_found
+      render json: { error: 'Entrance Manifest not found' }, status: :not_found
     end
   end
 
   # POST /api/v1/entranceManifests
   def create
-    EntranceManifest.create(ref: params[:ref], date: params[:date], origin: params[:origin])
-    render json: { message: 'Record created successfully' }, status: :created
+    entrance_manifest = EntranceManifest.create(entrance_manifest_params)
+    if entrance_manifest
+      render json: entrance_manifest.as_json, status: :created
+    else
+      render json: { errors: 'Failed to create Entrance Manifest' }, status: :unprocessable_entity
+    end
   end
 
   # PUT /api/v1/entranceManifests/:id
   def update
-    id = Cassandra::Uuid.new(params[:id])
-    EntranceManifest.update(id, params[:ref], date: params[:date], origin: params[:origin])
-    render json: { message: 'Record updated successfully' }
+    entrance_manifest = EntranceManifest.find(params[:id])
+    if entrance_manifest
+      updated_entrance_manifest = EntranceManifest.update(params[:id], entrance_manifest_params)
+      render json: updated_entrance_manifest.as_json, status: :ok
+    else
+      render json: { errors: 'Failed to update Entrance Manifest' }, status: :unprocessable_entity
+    end
   end
 
   # DELETE /api/v1/entranceManifests/:id
   def destroy
-    id = Cassandra::Uuid.new(params[:id])
-    EntranceManifest.destroy(id)
-    render json: { message: 'Record deleted successfully' }
+    entrance_manifest = EntranceManifest.find(params[:id])
+    if entrance_manifest
+      EntranceManifest.destroy(params[:id])
+      render json: { message: 'Entrance Manifest deleted' }, status: :ok
+    else
+      render json: { errors: 'Failed to delete Entrance Manifest' }, status: :unprocessable_entity
+    end
+  end
+
+  private
+
+  def entrance_manifest_params
+    params.require(:entrance_manifest).permit(:entrance_date, :origin, :reference)
   end
 end

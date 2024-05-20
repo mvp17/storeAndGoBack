@@ -21,6 +21,7 @@ bin/rails db:migrate
 ## Cassandra DB
 cassandra -f
 bundle exec rake cassandra:create_tables (File: lib/tasks/cassandra.rake)
+bundle exec rake cassandra:reset
 
 $ cqlsh
 Connected to your_cluster at 127.0.0.1:9042.
