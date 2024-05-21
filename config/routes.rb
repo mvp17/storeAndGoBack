@@ -2,6 +2,11 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       resources :entrance_manifests, only:[:index, :show, :create, :update, :destroy]
+      resources :departure_manifests, only: [:index, :show, :create, :update, :destroy]
+      resources :shipments, only: [:index, :show, :create, :update, :destroy]
+      resources :rooms, only: [:index, :show, :create, :update, :destroy]
+      resources :worker_tasks, only: [:index, :show, :create, :update, :destroy]
+      resources :technician_tasks, only: [:index, :show, :create, :update, :destroy]
     end
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

@@ -53,3 +53,11 @@ class Api::V1::EntranceManifestsController < ApplicationController
     params.require(:entrance_manifest).permit(:entrance_date, :origin, :reference)
   end
 end
+
+=begin
+  {
+    "entrance_date": "2024-12-20",
+    "origin": "test_origin852",
+    "reference": "test_reference 956"
+  }
+=end
