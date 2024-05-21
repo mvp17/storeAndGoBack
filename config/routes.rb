@@ -7,6 +7,7 @@ Rails.application.routes.draw do
       resources :rooms, only: [:index, :show, :create, :update, :destroy]
       resources :worker_tasks, only: [:index, :show, :create, :update, :destroy]
       resources :technician_tasks, only: [:index, :show, :create, :update, :destroy]
+      resources :sla_containers, only: [:index, :show, :create, :update, :destroy]
     end
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
