@@ -53,3 +53,14 @@ module Api
     end
   end
   
+=begin
+  {
+    "room_status": 0,
+    "pk": 3,
+    "name": "Sala Apr",
+    "temp": 22,
+    "hum": 17,
+    "quantity": 1,
+    "threshold": 20
+  }
+=end

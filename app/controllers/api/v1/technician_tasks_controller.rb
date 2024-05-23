@@ -52,3 +52,14 @@ module Api
         end
     end
 end
+
+=begin
+    {
+        type: 0,
+        description: "Desc 8521 todo",
+        room: "Room M1",
+        detail: "Detail 41785",
+        status: 0,
+        date: "01/01/2023"
+    } 
+=end

@@ -67,4 +67,3 @@ class TechnicianTask
         end
     end
 end
-  

@@ -40,12 +40,11 @@ namespace :cassandra do
     worker_tasks_statement = <<-CQL
       CREATE TABLE IF NOT EXISTS #{keyspace}.#{worker_tasks_table} (
         id UUID PRIMARY KEY,
-        type INT,
         description TEXT,
-        room TEXT,
-        detail TEXT,
-        status INT,
-        date TEXT
+        containers TEXT,
+        origin_room TEXT,
+        destination_room TEXT,
+        status INT
       );
     CQL
     
@@ -90,13 +89,10 @@ namespace :cassandra do
       );
     CQL
     
-    CassandraClient.execute(entrance_manifests_statement)
-    CassandraClient.execute(departure_manifests_statement)
-    CassandraClient.execute(shipments_statement)
-    CassandraClient.execute(rooms_statement)
-    CassandraClient.execute(worker_tasks_statement)
-    CassandraClient.execute(technician_tasks_statement)
-    CassandraClient.execute(sla_containers_statement)
+    [entrance_manifests_statement, departure_manifests_statement, rooms_statement, shipments_statement,
+     worker_tasks_statement, technician_tasks_statement, sla_containers_statement].each do |statement|
+      CassandraClient.execute(statement)
+    end
     
     puts "Tables #{entrance_manifests_table}, #{sla_containers_table}, #{technician_tasks_table}, #{worker_tasks_table}, #{rooms_table}, #{departure_manifests_table}, and #{shipments_table} created successfully in keyspace #{keyspace}."
   end
@@ -104,31 +100,13 @@ namespace :cassandra do
   desc 'Drop tables in Cassandra'
   task drop_tables: :environment do
     keyspace = 'my_keyspace'
-    entrance_manifests_table = 'entrance_manifests'
-    departure_manifests_table = 'departure_manifests'
-    shipments_table = 'shipments'
-    rooms_table = 'rooms'
-    worker_tasks_table = 'worker_tasks'
-    technician_tasks_table = 'technician_tasks'
-    sla_containers_table = 'sla_containers'
+    tables = %w[entrance_manifests departure_manifests shipments rooms worker_tasks technician_tasks sla_containers]
     
-    drop_entrance_manifests_statement = "DROP TABLE IF EXISTS #{keyspace}.#{entrance_manifests_table};"
-    drop_departure_manifests_statement = "DROP TABLE IF EXISTS #{keyspace}.#{departure_manifests_table};"
-    drop_shipments_statement = "DROP TABLE IF EXISTS #{keyspace}.#{shipments_table};"
-    drop_rooms_statement = "DROP TABLE IF EXISTS #{keyspace}.#{rooms_table};"
-    drop_worker_tasks_statement = "DROP TABLE IF EXISTS #{keyspace}.#{worker_tasks_table};"
-    drop_technician_tasks_statement = "DROP TABLE IF EXISTS #{keyspace}.#{technician_tasks_table};"
-    drop_sla_containers_statement = "DROP TABLE IF EXISTS #{keyspace}.#{sla_containers_table};"
-
-    CassandraClient.execute(drop_entrance_manifests_statement)
-    CassandraClient.execute(drop_departure_manifests_statement)
-    CassandraClient.execute(drop_shipments_statement)
-    CassandraClient.execute(drop_rooms_statement)
-    CassandraClient.execute(drop_worker_tasks_statement)
-    CassandraClient.execute(drop_technician_tasks_statement)
-    CassandraClient.execute(drop_sla_containers_statement)
-    
-    puts "Tables #{entrance_manifests_table}, #{sla_containers_table}, #{technician_tasks_table}, #{worker_tasks_table}, #{rooms_table}, #{departure_manifests_table}, and #{shipments_table} dropped successfully from keyspace #{keyspace}."
+    tables.each do |table|
+      statement = "DROP TABLE IF EXISTS #{keyspace}.#{table};"
+      CassandraClient.execute(statement)
+      puts "Table #{table} dropped successfully from keyspace #{keyspace}."
+    end
   end
 
   desc 'Reset Cassandra database by dropping and recreating tables'
