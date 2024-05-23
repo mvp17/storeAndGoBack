@@ -9,6 +9,7 @@ namespace :cassandra do
     worker_tasks_table = 'worker_tasks'
     technician_tasks_table = 'technician_tasks'
     sla_containers_table = 'sla_containers'
+    users_table = 'users'
     
     sla_containers_statement = <<-CQL
       CREATE TABLE IF NOT EXISTS #{keyspace}.#{sla_containers_table} (
@@ -88,19 +89,37 @@ namespace :cassandra do
         threshold INT
       );
     CQL
+
+    users_statement = <<-CQL
+      CREATE TABLE IF NOT EXISTS #{keyspace}.#{users_table} (
+        id UUID PRIMARY KEY,
+        username TEXT,
+        first_name TEXT,
+        last_name TEXT,
+        password_hash TEXT
+      );
+    CQL
     
-    [entrance_manifests_statement, departure_manifests_statement, rooms_statement, shipments_statement,
-     worker_tasks_statement, technician_tasks_statement, sla_containers_statement].each do |statement|
+    [
+      entrance_manifests_statement, 
+      departure_manifests_statement, 
+      rooms_statement, 
+      shipments_statement,
+      worker_tasks_statement, 
+      technician_tasks_statement, 
+      sla_containers_statement, 
+      users_statement
+    ].each do |statement|
       CassandraClient.execute(statement)
     end
     
-    puts "Tables #{entrance_manifests_table}, #{sla_containers_table}, #{technician_tasks_table}, #{worker_tasks_table}, #{rooms_table}, #{departure_manifests_table}, and #{shipments_table} created successfully in keyspace #{keyspace}."
+    puts "Tables #{entrance_manifests_table}, #{users_table}, #{sla_containers_table}, #{technician_tasks_table}, #{worker_tasks_table}, #{rooms_table}, #{departure_manifests_table}, and #{shipments_table} created successfully in keyspace #{keyspace}."
   end
 
   desc 'Drop tables in Cassandra'
   task drop_tables: :environment do
     keyspace = 'my_keyspace'
-    tables = %w[entrance_manifests departure_manifests shipments rooms worker_tasks technician_tasks sla_containers]
+    tables = %w[entrance_manifests  users departure_manifests shipments rooms worker_tasks technician_tasks sla_containers]
     
     tables.each do |table|
       statement = "DROP TABLE IF EXISTS #{keyspace}.#{table};"
