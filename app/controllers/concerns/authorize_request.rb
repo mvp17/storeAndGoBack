@@ -15,10 +15,9 @@ module AuthorizeRequest
       begin
         decoded = JsonWebToken.decode(token)
         puts "Decoded token: #{decoded.inspect}" # Debug statement
-        if decoded && decoded['user_id']
-          @current_user = User.find(decoded['user_id'])
+        if decoded && decoded[:user_id]
+          @current_user = User.find(decoded[:user_id])
           puts "Current user: #{@current_user.inspect}" # Debug statement
-          render json: { errors: 'Unauthorized or user not found' }, status: :unauthorized unless @current_user
         else
           render json: { errors: 'Invalid token' }, status: :unauthorized
         end
