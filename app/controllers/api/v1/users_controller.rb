@@ -24,7 +24,7 @@ module Api
   
         def destroy
           user = User.find(params[:id])
-          if user && user.id == @current_user_id
+          if user
             User.destroy(user.id)
             render json: { message: 'User deleted' }, status: :ok
           else

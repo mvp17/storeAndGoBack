@@ -25,7 +25,8 @@ class User
   end
 
   def self.find(id)
-    result = CassandraClient.execute('SELECT * FROM my_keyspace.users WHERE id = ?', arguments: [id]).first
+    uuid = Cassandra::Uuid.new(id)
+    result = CassandraClient.execute('SELECT * FROM my_keyspace.users WHERE id = ?', arguments: [uuid]).first
     new(parse_row(result)) if result
   end
 
@@ -47,7 +48,8 @@ class User
   end
 
   def self.destroy(id)
-    statement = 'DELETE FROM my_keyspace.users WHERE id = ?'
+    #uuid = Cassandra::Uuid.new(id)
+    statement = CassandraClient.prepare('DELETE FROM my_keyspace.users WHERE id = ?')
     CassandraClient.execute(statement, arguments: [id])
   end
 
