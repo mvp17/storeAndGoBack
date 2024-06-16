@@ -96,6 +96,7 @@ namespace :cassandra do
         username TEXT,
         first_name TEXT,
         last_name TEXT,
+        email TEXT,
         password_hash TEXT
       );
     CQL
@@ -119,7 +120,7 @@ namespace :cassandra do
   desc 'Drop tables in Cassandra'
   task drop_tables: :environment do
     keyspace = 'my_keyspace'
-    tables = %w[entrance_manifests  users departure_manifests shipments rooms worker_tasks technician_tasks sla_containers]
+    tables = %w[entrance_manifests users departure_manifests shipments rooms worker_tasks technician_tasks sla_containers]
     
     tables.each do |table|
       statement = "DROP TABLE IF EXISTS #{keyspace}.#{table};"
