@@ -35,7 +35,7 @@ class SLAContainer
   
     class << self
       def all
-        results = CassandraClient.execute('SELECT * FROM my_keyspace.sla_containers')
+        results = CassandraClient.execute('SELECT * FROM rails.sla_containers')
         results.rows.map do |row|
           new(
             id: row['id'],
@@ -48,7 +48,7 @@ class SLAContainer
   
       def find(id)
         uuid = Cassandra::Uuid.new(id)
-        statement = CassandraClient.prepare('SELECT * FROM my_keyspace.sla_containers WHERE id = ?')
+        statement = CassandraClient.prepare('SELECT * FROM rails.sla_containers WHERE id = ?')
         result = CassandraClient.execute(statement, arguments: [uuid]).first
         result ? new(
           id: result['id'],
@@ -60,7 +60,7 @@ class SLAContainer
   
       def create(attributes)
         id = Cassandra::Uuid.new(SecureRandom.uuid)
-        statement = CassandraClient.prepare('INSERT INTO my_keyspace.sla_containers (id, product_id, producer_id, quantity, sla, min_temp, max_temp, min_hum, max_hum, date_limit) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+        statement = CassandraClient.prepare('INSERT INTO rails.sla_containers (id, product_id, producer_id, quantity, sla, min_temp, max_temp, min_hum, max_hum, date_limit) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
         CassandraClient.execute(statement, arguments: [id, attributes[:product][:productId], attributes[:product][:producerId], attributes[:quantity], attributes[:sla][:SLA], attributes[:sla][:minTemp], attributes[:sla][:maxTemp], attributes[:sla][:minHum], attributes[:sla][:maxHum], attributes[:sla][:date_limit]])
         new(
           id: id,
@@ -72,14 +72,14 @@ class SLAContainer
   
       def update(id, attributes)
         uuid = Cassandra::Uuid.new(id)
-        statement = CassandraClient.prepare('UPDATE my_keyspace.sla_containers SET product_id = ?, producer_id = ?, quantity = ?, sla = ?, min_temp = ?, max_temp = ?, min_hum = ?, max_hum = ?, date_limit = ? WHERE id = ?')
+        statement = CassandraClient.prepare('UPDATE rails.sla_containers SET product_id = ?, producer_id = ?, quantity = ?, sla = ?, min_temp = ?, max_temp = ?, min_hum = ?, max_hum = ?, date_limit = ? WHERE id = ?')
         CassandraClient.execute(statement, arguments: [attributes[:product][:productId], attributes[:product][:producerId], attributes[:quantity], attributes[:sla][:SLA], attributes[:sla][:minTemp], attributes[:sla][:maxTemp], attributes[:sla][:minHum], attributes[:sla][:maxHum], attributes[:sla][:date_limit], uuid])
         find(id)
       end
   
       def destroy(id)
         uuid = Cassandra::Uuid.new(id)
-        statement = CassandraClient.prepare('DELETE FROM my_keyspace.sla_containers WHERE id = ?')
+        statement = CassandraClient.prepare('DELETE FROM rails.sla_containers WHERE id = ?')
         CassandraClient.execute(statement, arguments: [uuid])
       end
     end

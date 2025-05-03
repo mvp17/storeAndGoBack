@@ -25,7 +25,7 @@ class TechnicianTask
 
     class << self
         def all
-            results = CassandraClient.execute('SELECT * FROM my_keyspace.technician_tasks')
+            results = CassandraClient.execute('SELECT * FROM rails.technician_tasks')
             results.rows.map do |row|
                 new(
                 id: row['id'],
@@ -41,28 +41,28 @@ class TechnicianTask
 
         def find(id)
             uuid = Cassandra::Uuid.new(id)
-            statement = CassandraClient.prepare('SELECT * FROM my_keyspace.technician_tasks WHERE id = ?')
+            statement = CassandraClient.prepare('SELECT * FROM rails.technician_tasks WHERE id = ?')
             result = CassandraClient.execute(statement, arguments: [uuid]).first
             result ? new(id: result['id'], type: result['type'], description: result['description'], room: result['room'], detail: result['detail'], status: result['status'], date: result['date']) : nil
         end
 
         def create(attributes)
             id = Cassandra::Uuid.new(SecureRandom.uuid)
-            statement = CassandraClient.prepare('INSERT INTO my_keyspace.technician_tasks (id, type, description, room, detail, status, date) VALUES (?, ?, ?, ?, ?, ?, ?)')
+            statement = CassandraClient.prepare('INSERT INTO rails.technician_tasks (id, type, description, room, detail, status, date) VALUES (?, ?, ?, ?, ?, ?, ?)')
             CassandraClient.execute(statement, arguments: [id, attributes[:type], attributes[:description], attributes[:room], attributes[:detail], attributes[:status], attributes[:date]])
             new(id: id, type: attributes[:type], description: attributes[:description], room: attributes[:room], detail: attributes[:detail], status: attributes[:status], date: attributes[:date])
         end
 
         def update(id, attributes)
             uuid = Cassandra::Uuid.new(id)
-            statement = CassandraClient.prepare('UPDATE my_keyspace.technician_tasks SET type = ?, description = ?, room = ?, detail = ?, status = ?, date = ? WHERE id = ?')
+            statement = CassandraClient.prepare('UPDATE rails.technician_tasks SET type = ?, description = ?, room = ?, detail = ?, status = ?, date = ? WHERE id = ?')
             CassandraClient.execute(statement, arguments: [attributes[:type], attributes[:description], attributes[:room], attributes[:detail], attributes[:status], attributes[:date], uuid])
             find(id)
         end
 
         def destroy(id)
             uuid = Cassandra::Uuid.new(id)
-            statement = CassandraClient.prepare('DELETE FROM my_keyspace.technician_tasks WHERE id = ?')
+            statement = CassandraClient.prepare('DELETE FROM rails.technician_tasks WHERE id = ?')
             CassandraClient.execute(statement, arguments: [uuid])
         end
     end

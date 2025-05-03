@@ -6,4 +6,4 @@ CassandraClient = Cassandra.cluster(
   port: 9042,           # Default port for Cassandra
   username: 'cassandra', # If authentication is enabled
   password: 'cassandra'  # If authentication is enabled
-).connect('my_keyspace') # Replace 'your_keyspace' with the keyspace you are using
+).connect('rails') # Replace 'your_keyspace' with the keyspace you are using

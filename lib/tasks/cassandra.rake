@@ -1,7 +1,7 @@
 namespace :cassandra do
   desc 'Create tables in Cassandra'
   task create_tables: :environment do
-    keyspace = 'my_keyspace'
+    keyspace = 'rails'
     entrance_manifests_table = 'entrance_manifests'
     departure_manifests_table = 'departure_manifests'
     shipments_table = 'shipments'
@@ -81,7 +81,6 @@ namespace :cassandra do
       CREATE TABLE IF NOT EXISTS #{keyspace}.#{rooms_table} (
         id UUID PRIMARY KEY,
         room_status INT,
-        pk INT,
         name TEXT,
         temp INT,
         hum INT,
@@ -119,7 +118,7 @@ namespace :cassandra do
 
   desc 'Drop tables in Cassandra'
   task drop_tables: :environment do
-    keyspace = 'my_keyspace'
+    keyspace = 'rails'
     tables = %w[entrance_manifests users departure_manifests shipments rooms worker_tasks technician_tasks sla_containers]
     
     tables.each do |table|

@@ -24,7 +24,7 @@ class WorkerTask
 
   class << self
     def all
-      results = CassandraClient.execute('SELECT * FROM my_keyspace.worker_tasks')
+      results = CassandraClient.execute('SELECT * FROM rails.worker_tasks')
       results.rows.map do |row|
         new(
           id: row['id'],
@@ -39,7 +39,7 @@ class WorkerTask
 
     def find(id)
       uuid = Cassandra::Uuid.new(id) # Convert string id to Cassandra::Uuid
-      statement = CassandraClient.prepare('SELECT * FROM my_keyspace.worker_tasks WHERE id = ?')
+      statement = CassandraClient.prepare('SELECT * FROM rails.worker_tasks WHERE id = ?')
       result = CassandraClient.execute(statement, arguments: [uuid]).first
       puts "Raw result from Cassandra: #{result.inspect}" # Debug logging
       result ? new(
@@ -53,7 +53,7 @@ class WorkerTask
 
     def create(attributes)
       id = Cassandra::Uuid.new(SecureRandom.uuid)
-      statement = CassandraClient.prepare('INSERT INTO my_keyspace.worker_tasks (id, description, containers, origin_room, destination_room, status) VALUES (?, ?, ?, ?, ?, ?)')
+      statement = CassandraClient.prepare('INSERT INTO rails.worker_tasks (id, description, containers, origin_room, destination_room, status) VALUES (?, ?, ?, ?, ?, ?)')
       CassandraClient.execute(statement, arguments: [
                                                       id, 
                                                       attributes[:description], 
@@ -73,14 +73,14 @@ class WorkerTask
 
     def update(id, attributes)
       uuid = Cassandra::Uuid.new(id) # Convert string id to Cassandra::Uuid
-      statement = CassandraClient.prepare('UPDATE my_keyspace.worker_tasks SET description = ?, status = ?, containers = ?, origin_room = ?, destination_room = ? WHERE id = ?')
+      statement = CassandraClient.prepare('UPDATE rails.worker_tasks SET description = ?, status = ?, containers = ?, origin_room = ?, destination_room = ? WHERE id = ?')
       CassandraClient.execute(statement, arguments: [attributes[:description], attributes[:status], attributes[:containers].to_json, attributes[:origin_room].to_json, attributes[:destination_room].to_json, uuid])
       find(id) # Return the updated object
     end
 
     def destroy(id)
       uuid = Cassandra::Uuid.new(id) # Convert string id to Cassandra::Uuid
-      statement = CassandraClient.prepare('DELETE FROM my_keyspace.worker_tasks WHERE id = ?')
+      statement = CassandraClient.prepare('DELETE FROM rails.worker_tasks WHERE id = ?')
       CassandraClient.execute(statement, arguments: [uuid])
     end
   end

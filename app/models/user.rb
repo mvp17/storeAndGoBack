@@ -16,29 +16,29 @@ class User
   end
 
   def self.all
-    results = CassandraClient.execute('SELECT * FROM my_keyspace.users')
+    results = CassandraClient.execute('SELECT * FROM rails.users')
     results.rows.map { |row| new(parse_row(row)) }
   end
 
   def self.find_by_username(username)
-    result = CassandraClient.execute('SELECT * FROM my_keyspace.users WHERE username = ? ALLOW FILTERING', arguments: [username]).first
+    result = CassandraClient.execute('SELECT * FROM rails.users WHERE username = ? ALLOW FILTERING', arguments: [username]).first
     new(parse_row(result)) if result
   end
 
   def self.find_by_email(email)
-    result = CassandraClient.execute('SELECT * FROM my_keyspace.users WHERE email = ? ALLOW FILTERING', arguments: [email]).first
+    result = CassandraClient.execute('SELECT * FROM rails.users WHERE email = ? ALLOW FILTERING', arguments: [email]).first
     new(parse_row(result)) if result
   end
 
   def self.find(id)
     uuid = Cassandra::Uuid.new(id)
-    result = CassandraClient.execute('SELECT * FROM my_keyspace.users WHERE id = ?', arguments: [uuid]).first
+    result = CassandraClient.execute('SELECT * FROM rails.users WHERE id = ?', arguments: [uuid]).first
     new(parse_row(result)) if result
   end
 
   def save
     statement = <<-CQL
-      INSERT INTO my_keyspace.users (id, username, first_name, last_name, email, password_hash)
+      INSERT INTO rails.users (id, username, first_name, last_name, email, password_hash)
       VALUES (?, ?, ?, ?, ?, ?)
     CQL
     CassandraClient.execute(statement, arguments: [id, username, first_name, last_name, email, password_hash])
@@ -56,7 +56,7 @@ class User
 
   def self.destroy(id)
     #uuid = Cassandra::Uuid.new(id)
-    statement = CassandraClient.prepare('DELETE FROM my_keyspace.users WHERE id = ?')
+    statement = CassandraClient.prepare('DELETE FROM rails.users WHERE id = ?')
     CassandraClient.execute(statement, arguments: [id])
   end
 

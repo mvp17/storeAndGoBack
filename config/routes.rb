@@ -4,11 +4,16 @@ Rails.application.routes.draw do
       resources :entrance_manifests, only:[:index, :show, :create, :update, :destroy]
       resources :departure_manifests, only: [:index, :show, :create, :update, :destroy]
       resources :shipments, only: [:index, :show, :create, :update, :destroy]
-      resources :rooms, only: [:index, :show, :create, :update, :destroy]
+      resources :rooms, only: [:index, :show, :create, :update, :destroy] do
+        member do
+          patch 'open'
+          patch 'close'
+        end
+      end
       resources :worker_tasks, only: [:index, :show, :create, :update, :destroy]
       resources :technician_tasks, only: [:index, :show, :create, :update, :destroy]
       resources :sla_containers, only: [:index, :show, :create, :update, :destroy]
-      resources :users, only: [:destroy]
+      resources :users, only: [:destroy, :index]
 
       post 'users/sign_up', to: 'users#sign_up'
       post 'users/sign_in', to: 'users#sign_in'
