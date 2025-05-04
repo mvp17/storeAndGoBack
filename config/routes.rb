@@ -4,12 +4,7 @@ Rails.application.routes.draw do
       resources :entrance_manifests, only:[:index, :show, :create, :update, :destroy]
       resources :departure_manifests, only: [:index, :show, :create, :update, :destroy]
       resources :shipments, only: [:index, :show, :create, :update, :destroy]
-      resources :rooms, only: [:index, :show, :create, :update, :destroy] do
-        member do
-          patch 'open'
-          patch 'close'
-        end
-      end
+      resources :rooms, only: [:index, :show, :create, :update, :destroy]
       resources :worker_tasks, only: [:index, :show, :create, :update, :destroy]
       resources :technician_tasks, only: [:index, :show, :create, :update, :destroy]
       resources :sla_containers, only: [:index, :show, :create, :update, :destroy]
