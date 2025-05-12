@@ -47,7 +47,7 @@ module Api
             private
 
             def technician_task_params
-                params.require(:technician_task).permit(:type, :description, :room, :detail, :status, :date)
+                params.require(:technician_task).permit(:priority, :description, :room, :detail, :status, :date)
             end
         end
     end
@@ -55,7 +55,7 @@ end
 
 =begin
     {
-        type: 0,
+        priority: 0,
         description: "Desc 8521 todo",
         room: "Room M1",
         detail: "Detail 41785",

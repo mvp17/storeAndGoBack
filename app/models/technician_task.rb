@@ -1,9 +1,9 @@
 class TechnicianTask
-    attr_accessor :id, :type, :description, :room, :detail, :status, :date
+    attr_accessor :id, :priority, :description, :room, :detail, :status, :date
 
     def initialize(attributes = {})
         @id = attributes[:id]
-        @type = attributes[:type]
+        @priority = attributes[:priority]
         @description = attributes[:description]
         @room = attributes[:room]
         @detail = attributes[:detail]
@@ -14,7 +14,7 @@ class TechnicianTask
     def as_json(options = {})
         {
         id: @id.to_s,
-        type: @type,
+        priority: @priority,
         description: @description,
         room: @room,
         detail: @detail,
@@ -27,11 +27,14 @@ class TechnicianTask
         def all
             results = CassandraClient.execute('SELECT * FROM rails.technician_tasks')
             results.rows.map do |row|
+                room_id = row['room']
+                room = Room.find(room_id) if room_id
+
                 new(
                 id: row['id'],
-                type: row['type'],
+                priority: row['priority'],
                 description: row['description'],
-                room: row['room'],
+                room: room,
                 detail: row['detail'],
                 status: row['status'],
                 date: row['date']
@@ -43,20 +46,28 @@ class TechnicianTask
             uuid = Cassandra::Uuid.new(id)
             statement = CassandraClient.prepare('SELECT * FROM rails.technician_tasks WHERE id = ?')
             result = CassandraClient.execute(statement, arguments: [uuid]).first
-            result ? new(id: result['id'], type: result['type'], description: result['description'], room: result['room'], detail: result['detail'], status: result['status'], date: result['date']) : nil
+
+            return nil unless result
+
+            room_id = result['room']
+            room = Room.find(room_id) if room_id
+
+            new(id: result['id'], priority: result['priority'], description: result['description'], room: room, detail: result['detail'], status: result['status'], date: result['date'])
         end
 
         def create(attributes)
             id = Cassandra::Uuid.new(SecureRandom.uuid)
-            statement = CassandraClient.prepare('INSERT INTO rails.technician_tasks (id, type, description, room, detail, status, date) VALUES (?, ?, ?, ?, ?, ?, ?)')
-            CassandraClient.execute(statement, arguments: [id, attributes[:type], attributes[:description], attributes[:room], attributes[:detail], attributes[:status], attributes[:date]])
-            new(id: id, type: attributes[:type], description: attributes[:description], room: attributes[:room], detail: attributes[:detail], status: attributes[:status], date: attributes[:date])
+            room_uuid = attributes[:room] ? Cassandra::Uuid.new(attributes[:room]) : nil
+            attributes[:room] = room_uuid
+            statement = CassandraClient.prepare('INSERT INTO rails.technician_tasks (id, priority, description, room, detail, status, date) VALUES (?, ?, ?, ?, ?, ?, ?)')
+            CassandraClient.execute(statement, arguments: [id, attributes[:priority], attributes[:description], attributes[:room], attributes[:detail], attributes[:status], attributes[:date]])
+            new(id: id, priority: attributes[:priority], description: attributes[:description], room: attributes[:room], detail: attributes[:detail], status: attributes[:status], date: attributes[:date])
         end
 
         def update(id, attributes)
             uuid = Cassandra::Uuid.new(id)
-            statement = CassandraClient.prepare('UPDATE rails.technician_tasks SET type = ?, description = ?, room = ?, detail = ?, status = ?, date = ? WHERE id = ?')
-            CassandraClient.execute(statement, arguments: [attributes[:type], attributes[:description], attributes[:room], attributes[:detail], attributes[:status], attributes[:date], uuid])
+            statement = CassandraClient.prepare('UPDATE rails.technician_tasks SET priority = ?, description = ?, room = ?, detail = ?, status = ?, date = ? WHERE id = ?')
+            CassandraClient.execute(statement, arguments: [attributes[:priority], attributes[:description], attributes[:room], attributes[:detail], attributes[:status], attributes[:date], uuid])
             find(id)
         end
 

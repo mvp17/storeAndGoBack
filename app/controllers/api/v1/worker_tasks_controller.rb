@@ -47,7 +47,7 @@ module Api
           private
 
           def worker_task_params
-              params.require(:worker_task).permit(:description, :status, containers: [:product_id, :quantity], origin_room: [:name], destination_room: [:name])
+              params.require(:worker_task).permit(:description, :status, :origin_room, :destination_room, containers: [:product_id, :quantity])
           end
       end
   end

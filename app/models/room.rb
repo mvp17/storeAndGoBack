@@ -40,9 +40,9 @@ class Room
         end
   
         def find(id)
-            uuid = Cassandra::Uuid.new(id)
-            statement = CassandraClient.prepare('SELECT * FROM rails.rooms WHERE id = ?')
-            result = CassandraClient.execute(statement, arguments: [uuid]).first
+            # uuid = Cassandra::Uuid.new(id)
+            statement = CassandraClient.prepare('SELECT * FROM rails.rooms WHERE id = ?')            
+            result = CassandraClient.execute(statement, arguments: [id]).first
             result ? new(id: result['id'], room_status: result['room_status'], name: result['name'], temp: result['temp'], hum: result['hum'], quantity: result['quantity'], threshold: result['threshold']) : nil
         end
   
