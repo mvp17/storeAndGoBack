@@ -7,7 +7,8 @@ module Api
       end
 
       def show
-        room = Room.find(params[:id])
+        uuid = Cassandra::Uuid.new(params[:id])
+        room = Room.find(uuid)
         if room
           render json: room.as_json, status: :ok
         else

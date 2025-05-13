@@ -142,14 +142,13 @@ namespace :cassandra do
       { name: "Sala M2",     room_status: 1, temp: -26, hum: 21, quantity: 10, threshold: 20 },
       { name: "Sala M3",     room_status: 1, temp: 27, hum: 22, quantity: 10, threshold: 20 },
       { name: "Sala F7",     room_status: 1, temp: 28, hum: 23, quantity: 10, threshold: 20 },
-      { name: "Sala F7",     room_status: 1, temp: -29, hum: 24, quantity: 10, threshold: 20 },
       { name: "Sala F1",     room_status: 1, temp: 30, hum: 25, quantity: 10, threshold: 20 },
       { name: "Sala F2",     room_status: 1, temp: 31, hum: 15, quantity: 10, threshold: 20 },
       { name: "Sala F3",     room_status: 1, temp: 32, hum: 15, quantity: 10, threshold: 20 },
       { name: "Sala F4",     room_status: 1, temp: 25, hum: 15, quantity: 10, threshold: 20 },
       { name: "Sala F5",     room_status: 1, temp: 18, hum: 15, quantity: 10, threshold: 20 },
       { name: "Sala F6",     room_status: 1, temp: 10, hum: 15, quantity: 10, threshold: 20 },
-      { name: "Moll càrrega", room_status: 0, temp: nil, hum: nil, quantity: nil, threshold: nil }
+      { name: "Moll carrega", room_status: 0, temp: nil, hum: nil, quantity: nil, threshold: nil }
     ]
 
     statement = CassandraClient.prepare('INSERT INTO rails.rooms (id, room_status, name, temp, hum, quantity, threshold)
