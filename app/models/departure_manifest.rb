@@ -32,9 +32,8 @@ class DepartureManifest
     end
 
     def find(id)
-      uuid = Cassandra::Uuid.new(id) # Convert string id to Cassandra::Uuid
       statement = CassandraClient.prepare('SELECT * FROM rails.departure_manifests WHERE id = ?')
-      result = CassandraClient.execute(statement, arguments: [uuid]).first
+      result = CassandraClient.execute(statement, arguments: [id]).first
       puts "Raw result from Cassandra: #{result.inspect}" # Debug logging
       result ? new(id: result['id'], reference: result['reference'], departure_date: result['departure_date'], destination: result['destination']) : nil
     end
@@ -47,9 +46,8 @@ class DepartureManifest
     end
 
     def update(id, attributes)
-      uuid = Cassandra::Uuid.new(id) # Convert string id to Cassandra::Uuid
       statement = CassandraClient.prepare('UPDATE rails.departure_manifests SET reference = ?, departure_date = ?, destination = ? WHERE id = ?')
-      CassandraClient.execute(statement, arguments: [attributes[:reference], attributes[:departure_date], attributes[:destination], uuid])
+      CassandraClient.execute(statement, arguments: [attributes[:reference], attributes[:departure_date], attributes[:destination], id])
       find(id) # Return the updated object
     end
 

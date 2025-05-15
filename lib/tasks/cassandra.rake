@@ -14,10 +14,9 @@ namespace :cassandra do
     sla_containers_statement = <<-CQL
       CREATE TABLE IF NOT EXISTS #{keyspace}.#{sla_containers_table} (
         id UUID PRIMARY KEY,
-        product_id INT,
-        producer_id INT,
+        product TEXT,
+        producer TEXT,
         quantity INT,
-        sla TEXT,
         min_temp INT,
         max_temp INT,
         min_hum INT,
@@ -128,6 +127,176 @@ namespace :cassandra do
     end
   end
 
+
+  desc 'Seed SLA containers into Cassandra'
+  task seed_sla_containers: :environment do
+    keyspace = 'rails'
+    sla_containers_table = 'sla_containers'
+
+    # Sample seed data
+    containers = [
+      {
+        product: "Lettuce",
+        producer: "Farm A",
+        quantity: 200,
+        min_temp: 1,
+        max_temp: 5,
+        min_hum: 80,
+        max_hum: 95,
+        date_limit: "15-05-2025"
+      },
+      {
+        product: "Tomatoes",
+        producer: "Greenhouse B",
+        quantity: 150,
+        min_temp: 10,
+        max_temp: 15,
+        min_hum: 60,
+        max_hum: 70,
+        date_limit: "10-06-2025"
+      },
+      {
+        product: "Cheese",
+        producer: "Dairy Co",
+        quantity: 50,
+        min_temp: 2,
+        max_temp: 4,
+        min_hum: 65,
+        max_hum: 75,
+        date_limit: "01-07-2025"
+      },
+      {
+        product: "Spinach",
+        producer: "Organic Farms",
+        quantity: 180,
+        min_temp: 0,
+        max_temp: 4,
+        min_hum: 85,
+        max_hum: 95,
+        date_limit: "05-06-2025"
+      },
+      {
+        product: "Strawberries",
+        producer: "Berry Bros",
+        quantity: 120,
+        min_temp: 1,
+        max_temp: 3,
+        min_hum: 90,
+        max_hum: 95,
+        date_limit: "03-06-2025"
+      },
+      {
+        product: "Yogurt",
+        producer: "Dairy Co",
+        quantity: 300,
+        min_temp: 2,
+        max_temp: 5,
+        min_hum: 60,
+        max_hum: 75,
+        date_limit: "15-06-2025"
+      },
+      {
+        product: "Apples",
+        producer: "Orchard Fresh",
+        quantity: 400,
+        min_temp: 0,
+        max_temp: 2,
+        min_hum: 90,
+        max_hum: 95,
+        date_limit: "20-06-2025"
+      },
+      {
+        product: "Carrots",
+        producer: "Root Farms",
+        quantity: 220,
+        min_temp: 0,
+        max_temp: 4,
+        min_hum: 90,
+        max_hum: 95,
+        date_limit: "12-06-2025"
+      },
+      {
+        product: "Ice Cream",
+        producer: "Cool Treats Ltd",
+        quantity: 100,
+        min_temp: -20,
+        max_temp: -18,
+        min_hum: 50,
+        max_hum: 70,
+        date_limit: "30-08-2025"
+      },
+      {
+        product: "Milk",
+        producer: "Daily Dairy",
+        quantity: 250,
+        min_temp: 1,
+        max_temp: 4,
+        min_hum: 60,
+        max_hum: 75,
+        date_limit: "18-06-2025"
+      },
+      {
+        product: "Broccoli",
+        producer: "GreenHarvest",
+        quantity: 160,
+        min_temp: 0,
+        max_temp: 2,
+        min_hum: 85,
+        max_hum: 95,
+        date_limit: "07-06-2025"
+      },
+      {
+        product: "Grapes",
+        producer: "Vine Valley",
+        quantity: 180,
+        min_temp: 0,
+        max_temp: 1,
+        min_hum: 90,
+        max_hum: 95,
+        date_limit: "06-06-2025"
+      },
+      {
+        product: "Butter",
+        producer: "Golden Creamery",
+        quantity: 90,
+        min_temp: 1,
+        max_temp: 5,
+        min_hum: 60,
+        max_hum: 70,
+        date_limit: "22-06-2025"
+      }
+    ]
+
+    insert_statement = CassandraClient.prepare(
+      "INSERT INTO #{keyspace}.#{sla_containers_table} (id, product, producer, quantity, min_temp, max_temp, min_hum, max_hum, date_limit) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    )
+
+    containers.each do |container|
+      id = Cassandra::Uuid.new(SecureRandom.uuid)
+      begin
+        CassandraClient.execute(
+          insert_statement,
+          arguments: [
+            id,
+            container[:product],
+            container[:producer],
+            container[:quantity],
+            container[:min_temp],
+            container[:max_temp],
+            container[:min_hum],
+            container[:max_hum],
+            container[:date_limit]
+          ]
+        )
+        puts "Inserted container with product #{container[:product]}"
+      rescue => e
+        puts "Failed to insert container #{container[:product]}: #{e.message}"
+      end
+    end
+
+    puts "SLA containers inserted into #{keyspace}.#{sla_containers_table}"
+  end
+
   desc 'Seed rooms into Cassandra'
   task seed_rooms: :environment do
     keyspace = 'rails'
@@ -184,6 +353,7 @@ namespace :cassandra do
     Rake::Task['cassandra:drop_tables'].invoke
     Rake::Task['cassandra:create_tables'].invoke
     Rake::Task['cassandra:seed_rooms'].invoke
-    puts 'Database reset and rooms seeded successfully!'
+    Rake::Task['cassandra:seed_sla_containers'].invoke
+    puts 'Database reset and rooms and containers seeded successfully!'
   end
 end

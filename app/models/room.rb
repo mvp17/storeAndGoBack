@@ -40,7 +40,6 @@ class Room
         end
   
         def find(id)
-            # uuid = Cassandra::Uuid.new(id)
             statement = CassandraClient.prepare('SELECT * FROM rails.rooms WHERE id = ?')            
             result = CassandraClient.execute(statement, arguments: [id]).first
             result ? new(id: result['id'], room_status: result['room_status'], name: result['name'], temp: result['temp'], hum: result['hum'], quantity: result['quantity'], threshold: result['threshold']) : nil
@@ -54,9 +53,8 @@ class Room
         end
   
         def update(id, attributes)
-            uuid = Cassandra::Uuid.new(id)
             statement = CassandraClient.prepare('UPDATE rails.rooms SET room_status = ?, name = ?, temp = ?, hum = ?, quantity = ?, threshold = ? WHERE id = ?')
-            CassandraClient.execute(statement, arguments: [attributes[:room_status], attributes[:name], attributes[:temp], attributes[:hum], attributes[:quantity], attributes[:threshold], uuid])
+            CassandraClient.execute(statement, arguments: [attributes[:room_status], attributes[:name], attributes[:temp], attributes[:hum], attributes[:quantity], attributes[:threshold], id])
             find(id)
         end
   

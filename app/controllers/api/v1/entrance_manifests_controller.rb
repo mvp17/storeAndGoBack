@@ -7,7 +7,8 @@ class Api::V1::EntranceManifestsController < ApplicationController
 
   # GET /api/v1/entranceManifests/:id
   def show
-    entrance_manifest = EntranceManifest.find(params[:id])
+    uuid = Cassandra::Uuid.new(params[:id])
+    entrance_manifest = EntranceManifest.find(uuid)
     if entrance_manifest
       render json: entrance_manifest.as_json, status: :ok
     else
@@ -27,7 +28,8 @@ class Api::V1::EntranceManifestsController < ApplicationController
 
   # PUT /api/v1/entranceManifests/:id
   def update
-    entrance_manifest = EntranceManifest.find(params[:id])
+    uuid = Cassandra::Uuid.new(params[:id])
+    entrance_manifest = EntranceManifest.find(uuid)
     if entrance_manifest
       updated_entrance_manifest = EntranceManifest.update(params[:id], entrance_manifest_params)
       render json: updated_entrance_manifest.as_json, status: :ok

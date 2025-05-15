@@ -35,9 +35,8 @@ class EntranceManifest
 
     # Find a record by ID
     def find(id)
-      uuid = Cassandra::Uuid.new(id) # Convert string id to Cassandra::Uuid
       statement = CassandraClient.prepare('SELECT * FROM rails.entrance_manifests WHERE id = ?')
-      result = CassandraClient.execute(statement, arguments: [uuid]).first
+      result = CassandraClient.execute(statement, arguments: [id]).first
       puts "Raw result from Cassandra: #{result.inspect}" # Debug logging
       result ? new(id: result['id'], entrance_date: result['entrance_date'], origin: result['origin'], reference: result['reference']) : nil
     end
@@ -52,9 +51,8 @@ class EntranceManifest
 
     # Update a record by ID
     def update(id, attributes)
-      uuid = Cassandra::Uuid.new(id) # Convert string id to Cassandra::Uuid
       statement = CassandraClient.prepare('UPDATE rails.entrance_manifests SET reference = ?, entrance_date = ?, origin = ? WHERE id = ?')
-      CassandraClient.execute(statement, arguments: [attributes[:reference], attributes[:entrance_date], attributes[:origin], uuid])
+      CassandraClient.execute(statement, arguments: [attributes[:reference], attributes[:entrance_date], attributes[:origin], id])
       find(id)
     end
 

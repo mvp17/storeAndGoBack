@@ -26,9 +26,10 @@ module Api
       end
 
       def update
-        room = Room.find(params[:id])
+        uuid = Cassandra::Uuid.new(params[:id])
+        room = Room.find(uuid)
         if room
-          updated_room = Room.update(params[:id], room_params)
+          updated_room = Room.update(uuid, room_params)
           render json: updated_room.as_json, status: :ok
         else
           render json: { errors: 'Failed to update Room' }, status: :unprocessable_entity

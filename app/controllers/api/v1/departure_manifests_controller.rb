@@ -5,7 +5,8 @@ class Api::V1::DepartureManifestsController < ApplicationController
   end
 
   def show
-    departure_manifest = DepartureManifest.find(params[:id])
+    uuid = Cassandra::Uuid.new(params[:id])
+    departure_manifest = DepartureManifest.find(uuid)
     if departure_manifest
       render json: departure_manifest.as_json, status: :ok
     else
@@ -23,7 +24,8 @@ class Api::V1::DepartureManifestsController < ApplicationController
   end
 
   def update
-    departure_manifest = DepartureManifest.find(params[:id])
+    uuid = Cassandra::Uuid.new(params[:id])
+    departure_manifest = DepartureManifest.find(uuid)
     if departure_manifest
       updated_departure_manifest = DepartureManifest.update(params[:id], departure_manifest_params)
       render json: updated_departure_manifest.as_json, status: :ok
