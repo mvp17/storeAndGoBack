@@ -7,7 +7,8 @@ module Api
             end
 
             def show
-                technician_task = TechnicianTask.find(params[:id])
+                uuid = Cassandra::Uuid.new(params[:id])
+                technician_task = TechnicianTask.find(uuid)
                 if technician_task
                     render json: technician_task.as_json, status: :ok
                 else
@@ -25,9 +26,10 @@ module Api
             end
 
             def update
-                technician_task = TechnicianTask.find(params[:id])
+                uuid = Cassandra::Uuid.new(params[:id])
+                technician_task = TechnicianTask.find(uuid)
                 if technician_task
-                    updated_technician_task = TechnicianTask.update(params[:id], technician_task_params)
+                    updated_technician_task = TechnicianTask.update(uuid, technician_task_params)
                     render json: updated_technician_task.as_json, status: :ok
                 else
                     render json: { errors: 'Failed to update TechnicianTask' }, status: :unprocessable_entity
@@ -35,9 +37,10 @@ module Api
             end
 
             def destroy
-                technician_task = TechnicianTask.find(params[:id])
+                uuid = Cassandra::Uuid.new(params[:id])
+                technician_task = TechnicianTask.find(uuid)
                 if technician_task
-                    TechnicianTask.destroy(params[:id])
+                    TechnicianTask.destroy(uuid)
                     render json: { message: 'TechnicianTask deleted' }, status: :ok
                 else
                     render json: { errors: 'Failed to delete TechnicianTask' }, status: :unprocessable_entity

@@ -37,7 +37,8 @@ module Api
       end
 
       def destroy
-        room = Room.find(params[:id])
+        uuid = Cassandra::Uuid.new(params[:id])
+        room = Room.find(uuid)
         if room
           Room.destroy(params[:id])
           render json: { message: 'Room deleted' }, status: :ok

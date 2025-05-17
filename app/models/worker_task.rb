@@ -43,9 +43,8 @@ class WorkerTask
     end
 
     def find(id)
-      uuid = Cassandra::Uuid.new(id) # Convert string id to Cassandra::Uuid
       statement = CassandraClient.prepare('SELECT * FROM rails.worker_tasks WHERE id = ?')
-      result = CassandraClient.execute(statement, arguments: [uuid]).first
+      result = CassandraClient.execute(statement, arguments: [id]).first
 
       puts "Raw result from Cassandra: #{result.inspect}" # Debug logging
 
@@ -91,16 +90,14 @@ class WorkerTask
     end
 
     def update(id, attributes)
-      uuid = Cassandra::Uuid.new(id) # Convert string id to Cassandra::Uuid
       statement = CassandraClient.prepare('UPDATE rails.worker_tasks SET description = ?, status = ?, containers = ?, origin_room = ?, destination_room = ? WHERE id = ?')
-      CassandraClient.execute(statement, arguments: [attributes[:description], attributes[:status], attributes[:containers].to_json, attributes[:origin_room], attributes[:destination_room], uuid])
+      CassandraClient.execute(statement, arguments: [attributes[:description], attributes[:status], attributes[:containers].to_json, attributes[:origin_room], attributes[:destination_room], id])
       find(id) # Return the updated object
     end
 
     def destroy(id)
-      uuid = Cassandra::Uuid.new(id) # Convert string id to Cassandra::Uuid
       statement = CassandraClient.prepare('DELETE FROM rails.worker_tasks WHERE id = ?')
-      CassandraClient.execute(statement, arguments: [uuid])
+      CassandraClient.execute(statement, arguments: [id])
     end
   end
 end

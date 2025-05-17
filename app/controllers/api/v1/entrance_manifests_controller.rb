@@ -31,7 +31,7 @@ class Api::V1::EntranceManifestsController < ApplicationController
     uuid = Cassandra::Uuid.new(params[:id])
     entrance_manifest = EntranceManifest.find(uuid)
     if entrance_manifest
-      updated_entrance_manifest = EntranceManifest.update(params[:id], entrance_manifest_params)
+      updated_entrance_manifest = EntranceManifest.update(uuid, entrance_manifest_params)
       render json: updated_entrance_manifest.as_json, status: :ok
     else
       render json: { errors: 'Failed to update Entrance Manifest' }, status: :unprocessable_entity
@@ -40,9 +40,10 @@ class Api::V1::EntranceManifestsController < ApplicationController
 
   # DELETE /api/v1/entranceManifests/:id
   def destroy
-    entrance_manifest = EntranceManifest.find(params[:id])
+    uuid = Cassandra::Uuid.new(params[:id])
+    entrance_manifest = EntranceManifest.find(uuid)
     if entrance_manifest
-      EntranceManifest.destroy(params[:id])
+      EntranceManifest.destroy(uuid)
       render json: { message: 'Entrance Manifest deleted' }, status: :ok
     else
       render json: { errors: 'Failed to delete Entrance Manifest' }, status: :unprocessable_entity

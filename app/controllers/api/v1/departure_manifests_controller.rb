@@ -27,7 +27,7 @@ class Api::V1::DepartureManifestsController < ApplicationController
     uuid = Cassandra::Uuid.new(params[:id])
     departure_manifest = DepartureManifest.find(uuid)
     if departure_manifest
-      updated_departure_manifest = DepartureManifest.update(params[:id], departure_manifest_params)
+      updated_departure_manifest = DepartureManifest.update(uuid, departure_manifest_params)
       render json: updated_departure_manifest.as_json, status: :ok
     else
       render json: { errors: 'Failed to update Departure Manifest' }, status: :unprocessable_entity
@@ -35,9 +35,10 @@ class Api::V1::DepartureManifestsController < ApplicationController
   end
 
   def destroy
-    departure_manifest = DepartureManifest.find(params[:id])
+    uuid = Cassandra::Uuid.new(params[:id])
+    departure_manifest = DepartureManifest.find(uuid)
     if departure_manifest
-      DepartureManifest.destroy(params[:id])
+      DepartureManifest.destroy(uuid)
       render json: { message: 'Departure Manifest deleted' }, status: :ok
     else
       render json: { errors: 'Failed to delete Departure Manifest' }, status: :unprocessable_entity

@@ -85,9 +85,8 @@ class SLAContainer
       end
   
       def destroy(id)
-        uuid = Cassandra::Uuid.new(id)
         statement = CassandraClient.prepare('DELETE FROM rails.sla_containers WHERE id = ?')
-        CassandraClient.execute(statement, arguments: [uuid])
+        CassandraClient.execute(statement, arguments: [id])
       end
     end
 end

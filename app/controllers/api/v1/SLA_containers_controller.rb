@@ -42,9 +42,10 @@ module Api
 
       # DELETE /api/v1/sla_containers/:id
       def destroy
-        sla_container = SLAContainer.find(params[:id])
+        uuid = Cassandra::Uuid.new(params[:id])
+        sla_container = SLAContainer.find(uuid)
         if sla_container
-          SLAContainer.destroy(params[:id])
+          SLAContainer.destroy(uuid)
           render json: { message: 'SLA Container deleted' }, status: :ok
         else
           render json: { error: 'Failed to delete SLA Container' }, status: :unprocessable_entity

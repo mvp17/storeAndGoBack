@@ -59,9 +59,8 @@ class Room
         end
   
         def destroy(id)
-            uuid = Cassandra::Uuid.new(id)
             statement = CassandraClient.prepare('DELETE FROM rails.rooms WHERE id = ?')
-            CassandraClient.execute(statement, arguments: [uuid])
+            CassandraClient.execute(statement, arguments: [id])
         end
     end
 end

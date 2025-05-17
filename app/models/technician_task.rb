@@ -43,9 +43,8 @@ class TechnicianTask
         end
 
         def find(id)
-            uuid = Cassandra::Uuid.new(id)
             statement = CassandraClient.prepare('SELECT * FROM rails.technician_tasks WHERE id = ?')
-            result = CassandraClient.execute(statement, arguments: [uuid]).first
+            result = CassandraClient.execute(statement, arguments: [id]).first
 
             return nil unless result
 
@@ -65,16 +64,14 @@ class TechnicianTask
         end
 
         def update(id, attributes)
-            uuid = Cassandra::Uuid.new(id)
             statement = CassandraClient.prepare('UPDATE rails.technician_tasks SET priority = ?, description = ?, room = ?, detail = ?, status = ?, date = ? WHERE id = ?')
-            CassandraClient.execute(statement, arguments: [attributes[:priority], attributes[:description], attributes[:room], attributes[:detail], attributes[:status], attributes[:date], uuid])
+            CassandraClient.execute(statement, arguments: [attributes[:priority], attributes[:description], attributes[:room], attributes[:detail], attributes[:status], attributes[:date], id])
             find(id)
         end
 
         def destroy(id)
-            uuid = Cassandra::Uuid.new(id)
             statement = CassandraClient.prepare('DELETE FROM rails.technician_tasks WHERE id = ?')
-            CassandraClient.execute(statement, arguments: [uuid])
+            CassandraClient.execute(statement, arguments: [id])
         end
     end
 end

@@ -52,9 +52,8 @@ class DepartureManifest
     end
 
     def destroy(id)
-      uuid = Cassandra::Uuid.new(id) # Convert string id to Cassandra::Uuid
       statement = CassandraClient.prepare('DELETE FROM rails.departure_manifests WHERE id = ?')
-      CassandraClient.execute(statement, arguments: [uuid])
+      CassandraClient.execute(statement, arguments: [id])
     end
   end
 end
