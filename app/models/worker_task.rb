@@ -2,7 +2,7 @@ class WorkerTask
   attr_accessor :id, :description, :containers, :origin_room, :destination_room, :status
 
   def initialize(attributes = {})
-    puts "Initializing with attributes: #{attributes.inspect}" # Debug logging
+    puts "Initializing WORKER TASK with: #{attributes.inspect}" # Debug logging
     @id = attributes[:id]
     @description = attributes[:description]
     @containers = attributes[:containers]
@@ -58,7 +58,7 @@ class WorkerTask
       new(
         id: result['id'], 
         description: result['description'], 
-        containers: JSON.parse(result['containers']), 
+        containers: JSON.parse(result['containers']),
         origin_room: origin_room, 
         destination_room: destination_room,
         status: result['status']
@@ -90,6 +90,11 @@ class WorkerTask
     end
 
     def update(id, attributes)
+      origin_room_uuid = attributes[:origin_room] ? Cassandra::Uuid.new(attributes[:origin_room]) : nil
+      destination_room_uuid = attributes[:destination_room] ? Cassandra::Uuid.new(attributes[:destination_room]) : nil
+      attributes[:origin_room] = origin_room_uuid
+      attributes[:destination_room] = destination_room_uuid
+      
       statement = CassandraClient.prepare('UPDATE rails.worker_tasks SET description = ?, status = ?, containers = ?, origin_room = ?, destination_room = ? WHERE id = ?')
       CassandraClient.execute(statement, arguments: [attributes[:description], attributes[:status], attributes[:containers].to_json, attributes[:origin_room], attributes[:destination_room], id])
       find(id) # Return the updated object

@@ -2,6 +2,7 @@ class SLAContainer
     attr_accessor :id, :product, :producer, :quantity, :min_temp, :max_temp, :min_hum, :max_hum, :date_limit
   
     def initialize(attributes = {})
+      puts "Initializing SLA CONTAINER with: #{attributes.inspect}" # Debug logging
       @id = attributes[:id]
       @product = attributes[:product]
       @producer = attributes[:producer]

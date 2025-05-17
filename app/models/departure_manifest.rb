@@ -2,11 +2,12 @@ class DepartureManifest
   attr_accessor :id, :reference, :departure_date, :destination
 
   def initialize(attributes = {})
-    puts "Initializing with attributes: #{attributes.inspect}" # Debug logging
+    puts "Initializing DEPARTURE MANIFEST with: #{attributes.inspect}" # Debug logging
     @id = attributes[:id]
     @reference = attributes[:reference]
     @departure_date = attributes[:departure_date]
     @destination = attributes[:destination]
+    @containers = attributes[:containers]
   end
 
   def as_json(options = {})
@@ -14,6 +15,7 @@ class DepartureManifest
       id: @id.to_s,
       reference: @reference,
       departure_date: @departure_date,
+      containers: @containers,
       destination: @destination
     }
   end
@@ -26,6 +28,7 @@ class DepartureManifest
           id: row['id'],
           reference: row['reference'],
           departure_date: row['departure_date'],
+          containers: JSON.parse(row['containers']),
           destination: row['destination']
         )
       end
@@ -34,20 +37,30 @@ class DepartureManifest
     def find(id)
       statement = CassandraClient.prepare('SELECT * FROM rails.departure_manifests WHERE id = ?')
       result = CassandraClient.execute(statement, arguments: [id]).first
+      
       puts "Raw result from Cassandra: #{result.inspect}" # Debug logging
-      result ? new(id: result['id'], reference: result['reference'], departure_date: result['departure_date'], destination: result['destination']) : nil
+
+      return nil unless result
+
+      new(
+        id: result['id'], 
+        reference: result['reference'], 
+        departure_date: result['departure_date'],
+        containers: JSON.parse(result['containers']),
+        destination: result['destination']
+        )
     end
 
     def create(attributes)
       id = Cassandra::Uuid.new(SecureRandom.uuid)
-      statement = CassandraClient.prepare('INSERT INTO rails.departure_manifests (id, reference, departure_date, destination) VALUES (?, ?, ?, ?)')
-      CassandraClient.execute(statement, arguments: [id, attributes[:reference], attributes[:departure_date], attributes[:destination]])
-      new(id: id, reference: attributes[:reference], departure_date: attributes[:departure_date], destination: attributes[:destination])
+      statement = CassandraClient.prepare('INSERT INTO rails.departure_manifests (id, reference, departure_date, destination, containers) VALUES (?, ?, ?, ?, ?)')
+      CassandraClient.execute(statement, arguments: [id, attributes[:reference], attributes[:departure_date], attributes[:destination], attributes[:containers].to_json])
+      new(id: id, reference: attributes[:reference], departure_date: attributes[:departure_date], destination: attributes[:destination], containers: attributes[:containers])
     end
 
     def update(id, attributes)
-      statement = CassandraClient.prepare('UPDATE rails.departure_manifests SET reference = ?, departure_date = ?, destination = ? WHERE id = ?')
-      CassandraClient.execute(statement, arguments: [attributes[:reference], attributes[:departure_date], attributes[:destination], id])
+      statement = CassandraClient.prepare('UPDATE rails.departure_manifests SET reference = ?, departure_date = ?, destination = ?, containers = ? WHERE id = ?')
+      CassandraClient.execute(statement, arguments: [attributes[:reference], attributes[:departure_date], attributes[:destination], attributes[:containers].to_json, id])
       find(id) # Return the updated object
     end
 

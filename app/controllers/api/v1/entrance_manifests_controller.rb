@@ -1,11 +1,9 @@
 class Api::V1::EntranceManifestsController < ApplicationController
-  # GET /api/v1/entranceManifests
   def index
     entrance_manifests = EntranceManifest.all
     render json: entrance_manifests.map(&:as_json), status: :ok
   end
 
-  # GET /api/v1/entranceManifests/:id
   def show
     uuid = Cassandra::Uuid.new(params[:id])
     entrance_manifest = EntranceManifest.find(uuid)
@@ -16,7 +14,6 @@ class Api::V1::EntranceManifestsController < ApplicationController
     end
   end
 
-  # POST /api/v1/entranceManifests
   def create
     entrance_manifest = EntranceManifest.create(entrance_manifest_params)
     if entrance_manifest
@@ -26,7 +23,6 @@ class Api::V1::EntranceManifestsController < ApplicationController
     end
   end
 
-  # PUT /api/v1/entranceManifests/:id
   def update
     uuid = Cassandra::Uuid.new(params[:id])
     entrance_manifest = EntranceManifest.find(uuid)
@@ -38,7 +34,6 @@ class Api::V1::EntranceManifestsController < ApplicationController
     end
   end
 
-  # DELETE /api/v1/entranceManifests/:id
   def destroy
     uuid = Cassandra::Uuid.new(params[:id])
     entrance_manifest = EntranceManifest.find(uuid)
@@ -53,14 +48,6 @@ class Api::V1::EntranceManifestsController < ApplicationController
   private
 
   def entrance_manifest_params
-    params.require(:entrance_manifest).permit(:entrance_date, :origin, :reference)
+    params.require(:entrance_manifest).permit(:entrance_date, :origin, :reference, containers: [])
   end
 end
-
-=begin
-  {
-    "entrance_date": "2024-12-20",
-    "origin": "test_origin852",
-    "reference": "test_reference 956"
-  }
-=end

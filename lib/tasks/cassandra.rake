@@ -53,7 +53,8 @@ namespace :cassandra do
         id UUID PRIMARY KEY,
         reference TEXT,
         entrance_date TEXT,
-        origin TEXT
+        origin TEXT,
+        containers TEXT,
       );
     CQL
 
@@ -62,7 +63,8 @@ namespace :cassandra do
         id UUID PRIMARY KEY,
         reference TEXT,
         departure_date TEXT,
-        destination TEXT
+        destination TEXT,
+        containers TEXT,
       );
     CQL
 

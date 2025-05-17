@@ -48,15 +48,7 @@ class Api::V1::DepartureManifestsController < ApplicationController
   private
 
   def departure_manifest_params
-    params.require(:departure_manifest).permit(:reference, :departure_date, :destination)
+    params.require(:departure_manifest).permit(:reference, :departure_date, :destination, containers: [])
   end
 end
-
-=begin
-  {
-    "reference": "test_ref123",
-    "departure_date": "2024-08-20",
-    "destination": "test_destination 415"
-  }
-=end
   

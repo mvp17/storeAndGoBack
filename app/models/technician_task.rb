@@ -2,6 +2,7 @@ class TechnicianTask
     attr_accessor :id, :priority, :description, :room, :detail, :status, :date
 
     def initialize(attributes = {})
+        puts "Initializing TECHNICIAN TASK with: #{attributes.inspect}" # Debug logging
         @id = attributes[:id]
         @priority = attributes[:priority]
         @description = attributes[:description]
@@ -64,6 +65,8 @@ class TechnicianTask
         end
 
         def update(id, attributes)
+            room_uuid = attributes[:room] ? Cassandra::Uuid.new(attributes[:room]) : nil
+            attributes[:room] = room_uuid
             statement = CassandraClient.prepare('UPDATE rails.technician_tasks SET priority = ?, description = ?, room = ?, detail = ?, status = ?, date = ? WHERE id = ?')
             CassandraClient.execute(statement, arguments: [attributes[:priority], attributes[:description], attributes[:room], attributes[:detail], attributes[:status], attributes[:date], id])
             find(id)

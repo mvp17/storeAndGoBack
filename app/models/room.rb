@@ -2,6 +2,7 @@ class Room
     attr_accessor :id, :room_status, :name, :temp, :hum, :quantity, :threshold
   
     def initialize(attributes = {})
+        puts "Initializing ROOM with: #{attributes.inspect}" # Debug logging
         @id = attributes[:id]
         @room_status = attributes[:room_status]
         @name = attributes[:name]
