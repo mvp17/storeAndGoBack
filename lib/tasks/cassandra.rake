@@ -85,6 +85,7 @@ namespace :cassandra do
         name TEXT,
         temp INT,
         hum INT,
+        containers TEXT,
         quantity INT,
         threshold INT
       );
@@ -115,6 +116,18 @@ namespace :cassandra do
     end
     
     puts "Tables #{entrance_manifests_table}, #{users_table}, #{sla_containers_table}, #{technician_tasks_table}, #{worker_tasks_table}, #{rooms_table}, #{departure_manifests_table}, and #{shipments_table} created successfully in keyspace #{keyspace}."
+
+    # Add after your table creation statements
+    worker_task_indexes = [
+      "CREATE INDEX IF NOT EXISTS ON #{keyspace}.#{worker_tasks_table} (origin_room);",
+      "CREATE INDEX IF NOT EXISTS ON #{keyspace}.#{worker_tasks_table} (destination_room);"
+    ]
+
+    worker_task_indexes.each do |statement|
+      CassandraClient.execute(statement)
+    end
+
+    puts "Indexes for #{worker_tasks_table} (origin_room, destination_room) created."
   end
 
   desc 'Drop tables in Cassandra'
@@ -299,10 +312,148 @@ namespace :cassandra do
     puts "SLA containers inserted into #{keyspace}.#{sla_containers_table}"
   end
 
+
   desc 'Seed rooms into Cassandra'
   task seed_rooms: :environment do
+    require 'json'
+
     keyspace = 'rails'
     rooms_table = 'rooms'
+
+    # Original SLA container data (sampled per room)
+    containers_data = [
+      {
+        product: "Lettuce",
+        producer: "Farm A",
+        quantity: 200,
+        min_temp: 1,
+        max_temp: 5,
+        min_hum: 80,
+        max_hum: 95,
+        date_limit: "15-05-2025"
+      },
+      {
+        product: "Tomatoes",
+        producer: "Greenhouse B",
+        quantity: 150,
+        min_temp: 10,
+        max_temp: 15,
+        min_hum: 60,
+        max_hum: 70,
+        date_limit: "10-06-2025"
+      },
+      {
+        product: "Cheese",
+        producer: "Dairy Co",
+        quantity: 50,
+        min_temp: 2,
+        max_temp: 4,
+        min_hum: 65,
+        max_hum: 75,
+        date_limit: "01-07-2025"
+      },
+      {
+        product: "Spinach",
+        producer: "Organic Farms",
+        quantity: 180,
+        min_temp: 0,
+        max_temp: 4,
+        min_hum: 85,
+        max_hum: 95,
+        date_limit: "05-06-2025"
+      },
+      {
+        product: "Strawberries",
+        producer: "Berry Bros",
+        quantity: 120,
+        min_temp: 1,
+        max_temp: 3,
+        min_hum: 90,
+        max_hum: 95,
+        date_limit: "03-06-2025"
+      },
+      {
+        product: "Yogurt",
+        producer: "Dairy Co",
+        quantity: 300,
+        min_temp: 2,
+        max_temp: 5,
+        min_hum: 60,
+        max_hum: 75,
+        date_limit: "15-06-2025"
+      },
+      {
+        product: "Apples",
+        producer: "Orchard Fresh",
+        quantity: 400,
+        min_temp: 0,
+        max_temp: 2,
+        min_hum: 90,
+        max_hum: 95,
+        date_limit: "20-06-2025"
+      },
+      {
+        product: "Carrots",
+        producer: "Root Farms",
+        quantity: 220,
+        min_temp: 0,
+        max_temp: 4,
+        min_hum: 90,
+        max_hum: 95,
+        date_limit: "12-06-2025"
+      },
+      {
+        product: "Ice Cream",
+        producer: "Cool Treats Ltd",
+        quantity: 100,
+        min_temp: -20,
+        max_temp: -18,
+        min_hum: 50,
+        max_hum: 70,
+        date_limit: "30-08-2025"
+      },
+      {
+        product: "Milk",
+        producer: "Daily Dairy",
+        quantity: 250,
+        min_temp: 1,
+        max_temp: 4,
+        min_hum: 60,
+        max_hum: 75,
+        date_limit: "18-06-2025"
+      },
+      {
+        product: "Broccoli",
+        producer: "GreenHarvest",
+        quantity: 160,
+        min_temp: 0,
+        max_temp: 2,
+        min_hum: 85,
+        max_hum: 95,
+        date_limit: "07-06-2025"
+      },
+      {
+        product: "Grapes",
+        producer: "Vine Valley",
+        quantity: 180,
+        min_temp: 0,
+        max_temp: 1,
+        min_hum: 90,
+        max_hum: 95,
+        date_limit: "06-06-2025"
+      },
+      {
+        product: "Butter",
+        producer: "Golden Creamery",
+        quantity: 90,
+        min_temp: 1,
+        max_temp: 5,
+        min_hum: 60,
+        max_hum: 70,
+        date_limit: "22-06-2025"
+      }
+    ]
+
     rooms = [
       { name: "Sala 1",      room_status: 0, temp: 20, hum: 15, quantity: 10, threshold: 20 },
       { name: "Sala 2",      room_status: 1, temp: 21, hum: 16, quantity: 10, threshold: 20 },
@@ -322,12 +473,18 @@ namespace :cassandra do
       { name: "Moll carrega", room_status: 0, temp: nil, hum: nil, quantity: nil, threshold: nil }
     ]
 
-    statement = CassandraClient.prepare('INSERT INTO rails.rooms (id, room_status, name, temp, hum, quantity, threshold)
-      VALUES (?, ?, ?, ?, ?, ?, ?)')
-    
+    statement = CassandraClient.prepare(
+      "INSERT INTO #{keyspace}.#{rooms_table} (id, room_status, name, temp, hum, containers, quantity, threshold)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+    )
+
     rooms.each do |room|
       id = Cassandra::Uuid.new(SecureRandom.uuid)
-      
+
+      # Random 1 to 3 containers for each room
+      random_containers = containers_data.sample(rand(1..3))
+      serialized_containers = random_containers.to_json
+
       begin
         CassandraClient.execute(
           statement,
@@ -337,16 +494,16 @@ namespace :cassandra do
             room[:name],
             room[:temp],
             room[:hum],
+            serialized_containers,
             room[:quantity],
             room[:threshold]
           ]
         )
-        puts "Inserted room #{room[:name]}"
+        puts "Inserted room #{room[:name]} with #{random_containers.size} container(s)"
       rescue => e
         puts "Failed to insert room #{room[:name]}: #{e.message}"
       end
     end
-
     puts "Rooms inserted into #{keyspace}.#{rooms_table}"
   end
 

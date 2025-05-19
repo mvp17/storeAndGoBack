@@ -6,6 +6,7 @@ class Room
         @id = attributes[:id]
         @room_status = attributes[:room_status]
         @name = attributes[:name]
+        @containers = attributes[:containers]
         @temp = attributes[:temp]
         @hum = attributes[:hum]
         @quantity = attributes[:quantity]
@@ -17,6 +18,7 @@ class Room
             id: @id.to_s,
             room_status: @room_status,
             name: @name,
+            containers: @containers,
             temp: @temp,
             hum: @hum,
             quantity: @quantity,
@@ -34,6 +36,7 @@ class Room
                     name: row['name'],
                     temp: row['temp'],
                     hum: row['hum'],
+                    containers: JSON.parse(row['containers']),
                     quantity: row['quantity'],
                     threshold: row['threshold']
                 )
@@ -43,7 +46,19 @@ class Room
         def find(id)
             statement = CassandraClient.prepare('SELECT * FROM rails.rooms WHERE id = ?')            
             result = CassandraClient.execute(statement, arguments: [id]).first
-            result ? new(id: result['id'], room_status: result['room_status'], name: result['name'], temp: result['temp'], hum: result['hum'], quantity: result['quantity'], threshold: result['threshold']) : nil
+
+            return nil unless result
+
+            new(
+                id: result['id'], 
+                room_status: result['room_status'], 
+                name: result['name'], 
+                temp: result['temp'],
+                containers: JSON.parse(result['containers']),
+                hum: result['hum'], 
+                quantity: result['quantity'], 
+                threshold: result['threshold']
+            )
         end
   
         def create(attributes)

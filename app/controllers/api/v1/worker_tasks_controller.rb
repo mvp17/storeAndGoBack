@@ -47,6 +47,13 @@ module Api
         end
       end
 
+      def by_room
+        uuid_room_id = Cassandra::Uuid.new(params[:room_id])
+        tasks = WorkerTask.find_tasks_by_room_id(uuid_room_id)
+        puts tasks
+        render json: tasks.map(&:as_json), status: :ok
+      end
+
       private
 
       def worker_task_params

@@ -50,7 +50,7 @@ module Api
       private
 
       def room_params
-        params.require(:room).permit(:room_status, :name, :temp, :hum, :quantity, :threshold)
+        params.require(:room).permit(:room_status, :name, :temp, :hum, :quantity, :threshold, containers: [])
       end
     end
   end

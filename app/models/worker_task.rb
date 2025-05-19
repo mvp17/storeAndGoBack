@@ -65,6 +65,38 @@ class WorkerTask
       )
     end
 
+    def find_tasks_by_room_id(room_id)
+      origin_tasks = CassandraClient.execute(
+        CassandraClient.prepare('SELECT * FROM rails.worker_tasks WHERE origin_room = ?'),
+        arguments: [room_id]
+      )
+
+      destination_tasks = CassandraClient.execute(
+        CassandraClient.prepare('SELECT * FROM rails.worker_tasks WHERE destination_room = ?'),
+        arguments: [room_id]
+      )
+
+      all_tasks = origin_tasks.to_a + destination_tasks.to_a
+
+      # in this row['containers'], there are the uuid for each container. I have a method find in sla_containers model
+      all_tasks.map do |row|
+        origin_room = Room.find(row['origin_room']) if row['origin_room']
+        destination_room = Room.find(row['destination_room']) if row['destination_room']
+
+        container_ids = JSON.parse(row['containers'])
+        containers = container_ids.map { |id| SLAContainer.find(Cassandra::Uuid.new(id)) }.compact
+
+        new(
+          id: row['id'],
+          description: row['description'],
+          containers: containers,
+          origin_room: origin_room,
+          destination_room: destination_room,
+          status: row['status']
+        )
+      end
+    end
+
     def create(attributes)
       id = Cassandra::Uuid.new(SecureRandom.uuid)
       origin_room_uuid = attributes[:origin_room] ? Cassandra::Uuid.new(attributes[:origin_room]) : nil
